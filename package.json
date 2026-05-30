@@ -1,0 +1,21 @@
+{
+  "name": "base-unified-stack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^3.0.0",
+    "@nomicfoundation/hardhat-ethers": "^4.0.12",
+    "chai": "^4.5.0",
+    "ethers": "^6.16.0",
+    "forge-std": "^1.1.2",
+    "hardhat": "^3.7.0"
+  }
+}
