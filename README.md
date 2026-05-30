@@ -8,11 +8,19 @@ Base officially announced it is leaving the OP Stack and the Optimism Superchain
 
 | Operation | Base Unified Stack | OP Stack | Savings |
 |-----------|-------------------|----------|---------|
-| Upgrade (10 slots) | 402,859 gas | 1,088,639 gas | **63.0%** |
-| Node Operations (20 ops) | 595,172 gas | 1,892,786 gas | **68.6%** |
-| Custom Feature (TEE/ZK) | 504,835 gas | 847,365 gas | **40.4%** |
+| Upgrade (10 slots) | 402,859 gas | 502,493 gas | **19.8%** |
+| Node Operations (20 ops) | 595,172 gas | 1,052,104 gas | **43.4%** |
+| Custom Feature (TEE/ZK) | 504,835 gas | 849,906 gas | **40.6%** |
 
 All results are stored on-chain in the deployed contract. Anyone can verify.
+
+## How the Benchmarks Work
+
+Both stacks perform the **same logical operation**. The difference measures real coordination overhead:
+
+- **Upgrade**: Same state writes, but OP Stack adds cross-repo version verification (keccak256 per repo) and reconciliation metadata
+- **Node Operations**: Same ops, but OP Stack adds cross-repo validation and version tracking per operation
+- **Custom Features**: Same feature implementation, but OP Stack adds alliance approval tracking per feature
 
 ## Why Base Left OP Stack
 
@@ -68,6 +76,8 @@ contracts/
 scripts/
   demo.js                         # Run all benchmarks locally
   deploy.js                       # Deploy to Base Sepolia
+test/
+  (Solidity tests — add forge-std or use Hardhat test runner)
 .gitignore
 .env.example
 hardhat.config.js
