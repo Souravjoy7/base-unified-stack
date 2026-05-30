@@ -1,47 +1,58 @@
 import hre from "hardhat";
 
 async function main() {
-  const { ethers, network } = await hre.network.connect();
-
-  console.log(`Deploying to ${network.name}...`);
+  const { ethers } = await hre.network.connect();
 
   const [deployer] = await ethers.getSigners();
+  console.log(`Deploying to Base Sepolia...`);
   console.log(`Deployer: ${deployer.address}`);
   console.log(`Balance: ${ethers.formatEther(await ethers.provider.getBalance(deployer.address))} ETH`);
 
   console.log("\nDeploying BaseUnifiedStackBenchmark...");
-  const bench = await ethers.deployContract("BaseUnifiedStackBenchmark");
+  const factory = await ethers.getContractFactory("BaseUnifiedStackBenchmark");
+  const bench = await factory.deploy();
   await bench.waitForDeployment();
   const address = await bench.getAddress();
   console.log(`Deployed at: ${address}`);
 
+  // Attach to deployed contract with full ABI
+  const benchContract = await ethers.getContractAt("BaseUnifiedStackBenchmark", address);
+
   console.log("\nRunning benchmarks on-chain...");
 
-  const baseUpgrade = await bench.simulateBaseUpgrade(10);
-  await baseUpgrade.wait();
+  let tx = await benchContract.simulateBaseUpgrade(10);
+  await tx.wait();
   console.log("  Base upgrade: done");
 
-  const opUpgrade = await bench.simulateOpStackUpgrade(10);
-  await opUpgrade.wait();
+  tx = await benchContract.simulateOpStackUpgrade(10);
+  await tx.wait();
   console.log("  OP Stack upgrade: done");
 
-  const baseOps = await bench.simulateBaseNodeOps(20);
-  await baseOps.wait();
+  tx = await benchContract.simulateBaseNodeOps(20);
+  await tx.wait();
   console.log("  Base node ops: done");
 
-  const opOps = await bench.simulateOpStackNodeOps(20);
-  await opOps.wait();
+  tx = await benchContract.simulateOpStackNodeOps(20);
+  await tx.wait();
   console.log("  OP Stack node ops: done");
 
-  const baseFeature = await bench.simulateBaseCustomFeature(15);
-  await baseFeature.wait();
+  tx = await benchContract.simulateBaseCustomFeature(15);
+  await tx.wait();
   console.log("  Base custom feature: done");
 
-  const opFeature = await bench.simulateOpStackCustomFeature(15);
-  await opFeature.wait();
+  tx = await benchContract.simulateOpStackCustomFeature(15);
+  await tx.wait();
   console.log("  OP Stack custom feature: done");
 
-  console.log(`\nTotal results stored: ${await bench.getResultCount()}`);
+  const count = await benchContract.getResultCount();
+  console.log(`\nTotal results stored: ${count}`);
+
+  console.log("\nFetching results from chain...");
+  for (let i = 0; i < Number(count); i++) {
+    const r = await benchContract.getResult(i);
+    console.log(`  [${i}] ${r.stack} | ${r.operation} | ${r.gasUsed} gas | block ${r.blockNumber}`);
+  }
+
   console.log(`\nVerify on BaseScan: https://sepolia.basescan.org/address/${address}`);
 }
 
